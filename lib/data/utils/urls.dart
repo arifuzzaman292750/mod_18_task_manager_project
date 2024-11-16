@@ -21,7 +21,7 @@ class Urls {
       '$_baseUrl/deleteTask/$taskId';
 
   static const String taskStatusCount = '$_baseUrl/taskStatusCount';
-  static const String forgetPasswordEmail = '$_baseUrl/RecoverVerifyEmail';
-  static const String forgetPasswordOtp = '$_baseUrl/RecoverVerifyOtp';
+  static String forgetPasswordEmail(String email) => '$_baseUrl/RecoverVerifyEmail/$email';
+  static String forgetPasswordOtp(String email, String otp) => '$_baseUrl/RecoverVerifyOTP/$email/$otp';
 
 }

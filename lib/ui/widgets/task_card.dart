@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:task_manager_app_revision/data/models/network_response.dart';
+import 'package:get/get.dart';
 import 'package:task_manager_app_revision/data/models/task_model.dart';
-import 'package:task_manager_app_revision/data/services/network_caller.dart';
-import 'package:task_manager_app_revision/data/utils/urls.dart';
+import 'package:task_manager_app_revision/ui/controllers/change_status_task_card_controller.dart';
+import 'package:task_manager_app_revision/ui/controllers/delete_task_card_controller.dart';
 import 'package:task_manager_app_revision/ui/utils/app_colors.dart';
 import 'package:task_manager_app_revision/ui/widgets/centered_circular_progress_indicator.dart';
 import 'package:task_manager_app_revision/ui/widgets/snack_bar_message.dart';
@@ -23,8 +23,10 @@ class TaskCard extends StatefulWidget {
 
 class _TaskCardState extends State<TaskCard> {
   String _selectedStatus = '';
-  bool _changeStatusInProgress = false;
-  bool _deleteTaskInProgress = false;
+  final DeleteTaskCardController _deleteTaskCardController =
+      Get.find<DeleteTaskCardController>();
+  final ChangeStatusTaskCardController _changeStatusTaskCardController =
+      Get.find<ChangeStatusTaskCardController>();
 
   @override
   void initState() {
@@ -61,22 +63,27 @@ class _TaskCardState extends State<TaskCard> {
                 _buildTaskStatusChip(),
                 Wrap(
                   children: [
-                    Visibility(
-                      visible: _changeStatusInProgress == false,
-                      replacement: const CenteredCircularProgressIndicator(),
-                      child: IconButton(
-                        onPressed: _onTapEditButton,
-                        icon: const Icon(Icons.edit),
-                      ),
-                    ),
-                    Visibility(
-                      visible: _deleteTaskInProgress == false,
-                      replacement: const CenteredCircularProgressIndicator(),
-                      child: IconButton(
-                        onPressed: _onTapDeleteButton,
-                        icon: const Icon(Icons.delete),
-                      ),
-                    ),
+                    GetBuilder<ChangeStatusTaskCardController>(
+                        builder: (controller) {
+                      return Visibility(
+                        visible: !controller.inProgress,
+                        replacement: const CenteredCircularProgressIndicator(),
+                        child: IconButton(
+                          onPressed: _onTapEditButton,
+                          icon: const Icon(Icons.edit),
+                        ),
+                      );
+                    }),
+                    GetBuilder<DeleteTaskCardController>(builder: (controller) {
+                      return Visibility(
+                        visible: !controller.inProgress,
+                        replacement: const CenteredCircularProgressIndicator(),
+                        child: IconButton(
+                          onPressed: _onTapDeleteButton,
+                          icon: const Icon(Icons.delete),
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ],
@@ -116,7 +123,8 @@ class _TaskCardState extends State<TaskCard> {
                 return ListTile(
                   onTap: () {
                     _changeStatus(e);
-                    Navigator.pop(context);
+                    //Navigator.pop(context);
+                    Get.back();
                   },
                   title: Text(e),
                   selected: _selectedStatus == e,
@@ -129,7 +137,8 @@ class _TaskCardState extends State<TaskCard> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                //Navigator.pop(context);
+                Get.back();
               },
               child: const Text('Cancel'),
             ),
@@ -140,30 +149,26 @@ class _TaskCardState extends State<TaskCard> {
   }
 
   Future<void> _changeStatus(String newStatus) async {
-    _changeStatusInProgress = true;
-    setState(() {});
-    final NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.changeStatus(widget.taskModel.sId!, newStatus));
-    if (response.isSuccess) {
+    final bool result =
+        await _changeStatusTaskCardController.getChangeStatusTaskCard(
+      widget.taskModel.sId!,
+      newStatus,
+    );
+    if (result) {
       widget.onRefreshList();
     } else {
-      _changeStatusInProgress = false;
-      setState(() {});
-      showSnackBarMessage(context, response.errorMessage, true);
+      showSnackBarMessage(context, _changeStatusTaskCardController.errorMessage!, true);
     }
   }
 
   Future<void> _onTapDeleteButton() async {
-    _deleteTaskInProgress = true;
-    setState(() {});
-    final NetworkResponse response = await NetworkCaller.getRequest(
-        url: Urls.deleteTask(widget.taskModel.sId!));
-    if (response.isSuccess) {
+    final bool result = await _deleteTaskCardController
+        .getDeleteTaskCard(widget.taskModel.sId!);
+    if (result) {
       widget.onRefreshList();
     } else {
-      _deleteTaskInProgress = false;
-      setState(() {});
-      showSnackBarMessage(context, response.errorMessage, true);
+      showSnackBarMessage(
+          context, _deleteTaskCardController.errorMessage!, true);
     }
   }
 }

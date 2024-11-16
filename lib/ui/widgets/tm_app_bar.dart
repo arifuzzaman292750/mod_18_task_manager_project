@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manager_app_revision/ui/controllers/auth_controller.dart';
 import 'package:task_manager_app_revision/ui/screens/profile_screen.dart';
 import 'package:task_manager_app_revision/ui/screens/sign_in_screen.dart';
@@ -16,15 +17,16 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if(isProfileScreenOpen) {
+        if(isProfileScreenOpen == true) {
           return;
         }
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const ProfileScreen(),
-          ),
-        );
+        //Navigator.push(
+          //context,
+          //MaterialPageRoute(
+            //builder: (context) => const ProfileScreen(),
+          //),
+        //);
+        Get.toNamed(ProfileScreen.name);
       },
       child: AppBar(
         backgroundColor: AppColors.themeColor,
@@ -56,13 +58,14 @@ class TMAppBar extends StatelessWidget implements PreferredSizeWidget {
             IconButton(
               onPressed: () async {
                 await AuthController.clearUserData();
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SignInScreen(),
-                  ),
-                  (predicate) => false,
-                );
+                //Navigator.pushAndRemoveUntil(
+                  //context,
+                  //MaterialPageRoute(
+                    //builder: (context) => const SignInScreen(),
+                  //),
+                  //(predicate) => false,
+                //);
+                Get.offAllNamed(SignInScreen.name);
               },
               icon: const Icon(
                 Icons.logout,
